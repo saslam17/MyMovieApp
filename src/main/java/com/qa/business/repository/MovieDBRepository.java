@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
 
@@ -34,5 +35,42 @@ public class MovieDBRepository implements IMoviesRepository {
 		// TODO Auto-generated method stub
 		return util.getJSONForObject(movies);
 	}
+		
+		public String getAMovie(Long id) {
+			Movie aMovie = getMovie(id);
+			if(aMovie != null) {
+				return util.getJSONForObject(aMovie);
+			}
+			else {
+				return "{\"message\":\"movie not found\"}";
+			}
 
-}
+		}
+
+		private Movie getMovie(Long id) {
+			return manager.find(Movie.class, id);
+		}
+
+		@Transactional(REQUIRED)
+		public String createMovie(String movieJSON) {
+			Movie aMovie = util.getObjectForJSON(movieJSON, Movie.class);
+			manager.persist(aMovie);
+			return "{\"message\":\"movie created\"}";
+		}
+		
+		@Transactional(REQUIRED)
+		public String deleteMovie(Long id) {
+			Movie aMovie = getMovie(id);
+			if(aMovie != null) {
+				manager.remove(aMovie);
+				return "{\"message\":\"movie deleted\"}";
+			}
+			else {
+				return "{\"message\":\"movie not found\"}";
+			}
+		}
+
+		}
+
+
+
